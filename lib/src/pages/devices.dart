@@ -142,11 +142,11 @@ class _DevicesPageState extends State<DevicesPage> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        resizeToAvoidBottomInset: false,
-        backgroundColor: Colors.green.shade900,
-        body: Stack(
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      backgroundColor: Colors.green.shade900,
+      body: SafeArea(
+        child: Stack(
           children: [
             SizedBox(
               height: MediaQuery.of(context).size.height,
@@ -155,49 +155,51 @@ class _DevicesPageState extends State<DevicesPage> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   const SizedBox(height: 16),
-                  isLocActive
-                      ? isBTActive
-                          ? Expanded(
-                              child: Column(
-                                children: [
-                                  StreamBuilder<bool>(
-                                    stream: flutterBlue.isScanning,
-                                    initialData: false,
-                                    builder: (c, snapshot) {
-                                      if (snapshot.data!) {
-                                        return FloatingActionButton(
-                                          child: const Icon(Icons.stop),
-                                          onPressed: () =>
-                                              flutterBlue.stopScan(),
-                                          backgroundColor: Colors.red,
-                                        );
-                                      } else {
-                                        return FloatingActionButton(
-                                          child: const Icon(Icons.search),
-                                          onPressed: _startScan,
-                                        );
-                                      }
-                                    },
-                                  ),
-                                  const SizedBox(height: 16),
-                                  _deviceList(),
-                                ],
+                  LayoutBuilder(
+                    builder: (context, _) {
+                      if (isLocActive) {
+                        if (isBTActive) {
+                          return Column(
+                            children: [
+                              StreamBuilder<bool>(
+                                stream: flutterBlue.isScanning,
+                                initialData: false,
+                                builder: (c, snapshot) {
+                                  if (snapshot.data!) {
+                                    return FloatingActionButton(
+                                      child: const Icon(Icons.stop),
+                                      onPressed: () => flutterBlue.stopScan(),
+                                      backgroundColor: Colors.red,
+                                    );
+                                  } else {
+                                    return FloatingActionButton(
+                                      child: const Icon(Icons.search),
+                                      onPressed: _startScan,
+                                    );
+                                  }
+                                },
                               ),
-                            )
-                          : Padding(
-                              padding: const EdgeInsets.only(top: 50),
-                              child: Center(
-                                child: Text(
-                                  'Bluetooth is inactive.\nPlease turn it on.',
-                                  textAlign: TextAlign.center,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .headline4!
-                                      .copyWith(color: Colors.white),
-                                ),
+                              const SizedBox(height: 16),
+                              _deviceList(),
+                            ],
+                          );
+                        } else {
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 50),
+                            child: Center(
+                              child: Text(
+                                'Bluetooth is inactive.\nPlease turn it on.',
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .headline4!
+                                    .copyWith(color: Colors.white),
                               ),
-                            )
-                      : Padding(
+                            ),
+                          );
+                        }
+                      } else {
+                        return Padding(
                           padding: const EdgeInsets.only(top: 50),
                           child: Center(
                             child: Text(
@@ -209,7 +211,10 @@ class _DevicesPageState extends State<DevicesPage> {
                                   .copyWith(color: Colors.white),
                             ),
                           ),
-                        )
+                        );
+                      }
+                    },
+                  ),
                 ],
               ),
             ),
@@ -220,23 +225,22 @@ class _DevicesPageState extends State<DevicesPage> {
   }
 
   Widget _deviceList() {
-    return Expanded(
-      child: Card(
-        margin: const EdgeInsets.all(10),
-        color: Colors.transparent,
-        child: Padding(
-          padding: const EdgeInsets.all(10.0),
-          child: ListView.builder(
-            itemCount: devicesList.length,
-            itemBuilder: (context, index) {
-              if (devicesList[index].name.isNotEmpty) {
-                return _scanResultButton(
-                  device: devicesList[index],
-                );
-              }
-              return Container();
-            },
-          ),
+    return Card(
+      margin: const EdgeInsets.all(10),
+      color: Colors.transparent,
+      child: Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: ListView.builder(
+          shrinkWrap: true,
+          itemCount: devicesList.length,
+          itemBuilder: (context, index) {
+            if (devicesList[index].name.isNotEmpty) {
+              return _scanResultButton(
+                device: devicesList[index],
+              );
+            }
+            return Container();
+          },
         ),
       ),
     );
@@ -286,7 +290,7 @@ class _DevicesPageState extends State<DevicesPage> {
                 CustomSnackbar(
                   context,
                   status: Status.error,
-                  text: 'This device is not a Gift Box device',
+                  text: 'This device is not a Arduino device',
                 );
                 setState(() {
                   isConnecting = false;
